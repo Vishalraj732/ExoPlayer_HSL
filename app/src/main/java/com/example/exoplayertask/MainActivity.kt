@@ -10,12 +10,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity(),VideoAdapter.OnVideoItemClicked {
     private lateinit var playerView: PlayerView
     private lateinit var mainViewModel: MainViewModel
 
-    private var currentWindow = 0
     private var playbackPosition: Long = 0
     private var isFullscreen = false
     private var isPlayerPlaying = true
@@ -55,7 +54,7 @@ class MainActivity : AppCompatActivity(),VideoAdapter.OnVideoItemClicked {
             isPlayerPlaying = savedInstanceState.getBoolean(STATE_PLAYER_PLAYING)
         }
 
-        mFullScreenButton.setOnClickListener(View.OnClickListener {
+        mFullScreenButton.setOnClickListener{
             if (!isFullscreen) {
                 this.requestedOrientation =
                     ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
@@ -65,19 +64,20 @@ class MainActivity : AppCompatActivity(),VideoAdapter.OnVideoItemClicked {
                     ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
                 closeFullscreenDialog()
             }
-        })
+        }
 
-        mFullScreenDialog = object : Dialog(this) {
-            override fun onBackPressed() {
-                if (isFullscreen) {   //mExoPlayerFullscreen is a boolean that we need to maintain to know whether screen is fullscreen or not.
-                    this@MainActivity.requestedOrientation =
-                        ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                    closeFullscreenDialog()
+        playerView.setControllerVisibilityListener {
+            when (it) {
+                View.GONE -> {
+                    mFullScreenButton.visibility = View.GONE
                 }
-                super.onBackPressed()
+                View.VISIBLE -> {
+                    mFullScreenButton.visibility = View.VISIBLE
+                }
             }
         }
 
+        mFullScreenDialog = object : Dialog(this){}
         loadData()
         startPlayer(dataList[mainViewModel.currentIndex].videoUrl)
     }
@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity(),VideoAdapter.OnVideoItemClicked {
             .build()
         exoPlayer.apply {
             playWhenReady = isPlayerPlaying
-            seekTo(currentWindow, playbackPosition)
+            seekTo(playbackPosition)
             setMediaItem(mediaItem, false)
             prepare()
             addListener(object : Player.Listener {
@@ -110,13 +110,11 @@ class MainActivity : AppCompatActivity(),VideoAdapter.OnVideoItemClicked {
             })
         }
         playerView.player = exoPlayer
-        playerView.showController()
     }
 
     private fun releasePlayer() {
         isPlayerPlaying = exoPlayer.playWhenReady
         playbackPosition = exoPlayer.currentPosition
-        currentWindow = exoPlayer.currentMediaItemIndex
         exoPlayer.release()
     }
 
@@ -138,6 +136,16 @@ class MainActivity : AppCompatActivity(),VideoAdapter.OnVideoItemClicked {
         super.onStop()
             playerView.onPause()
             releasePlayer()
+    }
+
+    override fun onBackPressed() {
+        if (isFullscreen) {   //mExoPlayerFullscreen is a boolean that we need to maintain to know whether screen is fullscreen or not.
+            this@MainActivity.requestedOrientation =
+                ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+            closeFullscreenDialog()
+        }
+        else
+        super.onBackPressed()
     }
 
     private fun loadData() {
