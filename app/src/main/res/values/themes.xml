@@ -1,0 +1,25 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.ExoPlayerTask" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.ExoPlayerTask" parent="Base.Theme.ExoPlayerTask" />
+
+    <style name="ExoMediaButton.Previous">
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="ExoMediaButton.Next">
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="ExoMediaButton.Rewind">
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="ExoMediaButton.FastForward">
+        <item name="android:visibility">gone</item>
+    </style>
+</resources>
